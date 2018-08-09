@@ -1,2 +1,2 @@
-# mofron-comp-calender
-calender component for mofron
+# mofron-comp-calendar
+calendar component for mofron
