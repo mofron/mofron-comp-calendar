@@ -1,0 +1,29 @@
+{
+  "name": "mofron-comp-calendar",
+  "version": "0.0.1",
+  "description": "calendar compoennt for mofron",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mofron/mofron-comp-calendar.git"
+  },
+  "dependencies": {
+      "mofron-comp-table" : "",
+      "mofron-effect-hrzpos" : "",
+      "mofron-event-mouseover" "",
+      "mofron-event-mouseout" : "",
+      "mofron-event-click" : ""
+  },
+  "keywords": [
+    "front-end"
+  ],
+  "author": "simparts",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mofron/mofron-comp-calendar/issues"
+  },
+  "homepage": "https://github.com/mofron/mofron-comp-calendar#readme"
+}
