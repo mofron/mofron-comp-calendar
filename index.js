@@ -173,10 +173,11 @@ mf.comp.Calendar = class extends mf.Component {
             /* set day */
             let downdt  = new Date(prm.toString());
             let tbl_chd = this.getChild(true)[1].child();
-            let off     = prm.getDay() + 7;
+            let off     = (prm.getDay()-1) + 6;
             /* up */
             for (let upidx=0; upidx < 31 ;upidx++) {
-                if ((1 === prm.getDate()) && (0 !== upidx)) {
+                if ( ((1 === prm.getDate()) && (0 !== upidx)) ||
+                     (31 < prm.getDate()) ) {
                     break;
                 }
                 
