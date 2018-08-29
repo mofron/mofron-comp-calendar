@@ -13,7 +13,7 @@
   "dependencies": {
       "mofron-comp-table" : "",
       "mofron-effect-hrzpos" : "",
-      "mofron-event-mouseover" "",
+      "mofron-event-mouseover" : "",
       "mofron-event-mouseout" : "",
       "mofron-event-click" : ""
   },
