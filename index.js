@@ -50,7 +50,7 @@ mf.comp.Calendar = class extends mf.Component {
             this.child([
                 new Text({
                     effect : [ new HrzPos('center') ],
-                    size   : 0.4,
+                    size   : '0.4rem',
                     text   : ''
                 }),
                 table
@@ -103,7 +103,7 @@ mf.comp.Calendar = class extends mf.Component {
                 })
             }
             this.date(new Date());
-            this.size(6, 4);
+            this.size('6rem', '4rem');
         } catch (e) {
             console.error(e.stack);
             throw e;
