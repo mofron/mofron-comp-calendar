@@ -202,6 +202,12 @@ mf.comp.Calendar = class extends mf.Component {
                 if ( (31 < fdt.getDate()) || ((1 == fdt.getDate()) && (20 < upidx)) ) {
                     break;
                 }
+                if ( (fdt.getDate()     === new Date().getDate())    &&
+                     (fdt.getMonth()    === new Date().getMonth())   &&
+                     (fdt.getFullYear() === new Date().getFullYear()) ) {
+                    this.todayStyle(dayTxt[upidx]);
+                }
+                
                 dayTxt[upidx].text(fdt.getDate() + '');
                 fdt.setDate(fdt.getDate() + 1);
             }
