@@ -67,7 +67,7 @@ mf.comp.Calendar = class extends mf.Component {
                     throw e;
                 }
             }
-            for (let idx=0; idx < 35; idx++) {
+            for (let idx=0; idx < 42; idx++) {
                 table.execOption({
                     child : [
                         new Text({
@@ -144,12 +144,29 @@ mf.comp.Calendar = class extends mf.Component {
     getDayText (prm) {
         try {
             if (undefined === prm) {
-                return this.getChild(true)[1].child();
+                let buf = this.getChild(true)[1].child();
+                let ret = [];
+                for (let bidx in buf) {
+                    if (6 >= parseInt(bidx)) {
+                        continue;
+                    }
+                    ret.push(buf[bidx]);
+                }
+                return ret;
             } else if ('number' === typeof prm) {
-                if (undefined === this.getDayText()[prm]) {
+                let stoff  = 0;
+                let daytxt = this.getDayText();
+                for (let didx in daytxt) {
+                    if("1" === daytxt[didx].text()) {
+                        stoff = parseInt(didx);
+                        break;
+                    }
+                }
+                
+                if (undefined === this.getDayText()[stoff + prm]) {
                     throw new Error('invalid parameter');
                 }
-                return this.getDayText()[prm];
+                return this.getDayText()[stoff + prm];
             } else {
                 throw new Error('invalid parameter');
             }
@@ -163,7 +180,10 @@ mf.comp.Calendar = class extends mf.Component {
         try {
             if (undefined === prm) {
                 /* getter */
-                return (undefined === this.m_date) ? null : this.m_date;
+                if (undefined === this.m_date) {
+                    this.date(new Date());
+                }
+                return this.m_date;
             }
             /* setter */
             /* set month */
@@ -171,37 +191,36 @@ mf.comp.Calendar = class extends mf.Component {
                 text : (1 + prm.getMonth()) + ''
             });
             /* set day */
-            let downdt  = new Date(prm.toString());
-            let tbl_chd = this.getChild(true)[1].child();
-            let off     = (prm.getDay()-1) + 6;
-            /* up */
-            for (let upidx=0; upidx < 31 ;upidx++) {
-                if ( ((1 === prm.getDate()) && (0 !== upidx)) ||
-                     (31 < prm.getDate()) ) {
+            this.m_date = prm;
+            
+            let fdt    = this.get1stDate();
+            let dayTxt = this.getDayText();
+            for (let upidx=0; upidx < 50 ;upidx++) {
+                if (upidx < fdt.getDay()) {
+                    continue;
+                }
+                if ( (31 < fdt.getDate()) || ((1 == fdt.getDate()) && (20 < upidx)) ) {
                     break;
                 }
-                
-                this.getDayText(prm.getDate() + off).execOption({
-                    text : prm.getDate() + ''
-                });
-                if (0 === upidx) {
-                    this.todayStyle(this.getDayText(prm.getDate() + off));
-                }
-                
-                prm.setDate(prm.getDate() + 1);
+                dayTxt[upidx].text(fdt.getDate() + '');
+                fdt.setDate(fdt.getDate() + 1);
             }
-            /* down */
-            if (1 === downdt.getDate()) {
-                return;
-            }
-            downdt.setDate(downdt.getDate()-1);
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    get1stDate () {
+        try {
+            let downdt = new Date(this.date().toString());
             for (let dwidx=31; dwidx > 0 ;dwidx--) {
-                this.getDayText(downdt.getDate() + off).text(downdt.getDate() + '');
                 if (1 === downdt.getDate()) {
-                    break;
+                    return downdt;
                 }
                 downdt.setDate(downdt.getDate()-1);
             }
+            throw new Error('failed get first date');
         } catch (e) {
             console.error(e.stack);
             throw e;
