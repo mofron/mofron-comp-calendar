@@ -1,6 +1,6 @@
 {
   "name": "mofron-comp-calendar",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "calendar compoennt for mofron",
   "main": "index.js",
   "scripts": {
@@ -13,9 +13,8 @@
   "dependencies": {
       "mofron-comp-table" : "",
       "mofron-effect-hrzpos" : "",
-      "mofron-event-mouseover" : "",
-      "mofron-event-mouseout" : "",
-      "mofron-event-click" : ""
+      "mofron-event-click" : "",
+      "mofron-event-hover" : ""
   },
   "keywords": [
     "front-end"

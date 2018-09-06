@@ -6,9 +6,8 @@ const mf       = require('mofron');
 const Text     = require('mofron-comp-text');
 const Table    = require('mofron-comp-table');
 const HrzPos   = require('mofron-effect-hrzpos');
-const MousOver = require('mofron-event-mouseover');
-const MousOut  = require('mofron-event-mouseout');
 const Click    = require('mofron-event-click');
+const Hover = require('mofron-event-hover');
 
 /**
  * @class mofron.comp.Calender
@@ -42,61 +41,44 @@ mf.comp.Calendar = class extends mf.Component {
         try {
             super.initDomConts();
             
-            /* week */
-            let table = new Table({
-                colLength : 7,
-                child     : this.weekString()
-            });
             this.child([
-                new Text({
-                    effect : [ new HrzPos('center') ],
-                    size   : '0.4rem',
-                    text   : ''
-                }),
-                table
+                this.month(),
+                this.table()
             ]);
             
+            this.table().execOption({
+                child : this.weekString()  /* week */
+            });
+            
             /* day index text */
-            let mous_evt = (tgt, mp) => {
+            let mous_evt = (tgt, prm, flg) => {
                 try {
                     tgt.adom().parent().style(
-                        mp[0].hoverStyle(mp[1])
+                        prm.hoverStyle(flg)
                     );
                 } catch (e) {
                     console.error(e.stack);
                     throw e;
                 }
             }
+            let day_clk = (tgt, prm) => {
+                try {
+                    if (null !== prm.dayClickEvent()) {
+                        prm.dayClickEvent()[0](tgt, prm.dayClickEvent()[1]);
+                    }
+                } catch (e) {
+                    console.error(e.stack);
+                    throw e;
+                }
+            }
             for (let idx=0; idx < 42; idx++) {
-                table.execOption({
+                this.table().execOption({
                     child : [
                         new Text({
                             text  : '',
                             event : [
-                                new MousOver({
-                                    handler : new mf.Param(mous_evt,[this,true])
-                                }),
-                                new MousOut({
-                                    handler : new mf.Param(mous_evt,[this,false])
-                                }),
-                                new Click({
-                                    handler : new mf.Param(
-                                        (tgt, prm) => {
-                                            try {
-                                                if (null !== prm.dayClickEvent()) {
-                                                    prm.dayClickEvent()[0](
-                                                        tgt,
-                                                        prm.dayClickEvent()[1]
-                                                    );
-                                                }
-                                            } catch (e) {
-                                                console.error(e.stack);
-                                                throw e;
-                                            }
-                                        },
-                                        this
-                                    )
-                                })
+                                new Hover(new mf.Param(mous_evt, this)),
+                                new Click(new mf.Param(day_clk,this))
                             ]
                         })
                     ]
@@ -109,6 +91,52 @@ mf.comp.Calendar = class extends mf.Component {
             throw e;
         }
     }
+    
+    month (prm) {
+        try {
+            if (undefined === prm) {
+                /* getter */
+                if (undefined === this.m_month) {
+                    this.month(
+                        new Text({
+                            effect : [ new HrzPos('center') ],
+                            size   : '0.4rem',
+                            text   : ''
+                        })
+                    );
+                }
+                return this.m_month;
+            }
+            /* setter */
+            if (true !== mf.func.isInclude(prm, 'Text')) {
+                throw new Error('invalid parameter');
+            }
+            this.m_month = prm;
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    table (prm) {
+        try {
+            if (undefined === prm) {
+                /* getter */
+                if (undefined === this.m_table) {
+                    this.table(new Table({ colLength : 7 }));
+                }
+                return this.m_table;
+            }
+            /* setter */
+            if (true !== mf.func.isInclude(prm, 'Table')) {
+                throw new Error('invalid parameter');
+            }
+            this.m_table = prm;
+        } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    } 
     
     weekString (prm) {
         try {
@@ -144,29 +172,35 @@ mf.comp.Calendar = class extends mf.Component {
     getDayText (prm) {
         try {
             if (undefined === prm) {
-                let buf = this.getChild(true)[1].child();
-                let ret = [];
-                for (let bidx in buf) {
-                    if (6 >= parseInt(bidx)) {
+                let ret     = [];
+                let tbl_chd = this.table().child();
+                for (let tidx in tbl_chd) {
+                    if ("1" !== tbl_chd[tidx].text()) {
                         continue;
                     }
-                    ret.push(buf[bidx]);
+                    for (let didx=tidx; didx < 48 ;didx++) {
+                        if ("" === tbl_chd[didx].text()) {
+                            return ret;
+                        }
+                        ret.push(tbl_chd[didx]);
+                    }
+                    break;
                 }
-                return ret;
+                throw new Error('could not find day text');
             } else if ('number' === typeof prm) {
-                let stoff  = 0;
-                let daytxt = this.getDayText();
+                let stoff  = 6;
+                let daytxt = this.table().child();
                 for (let didx in daytxt) {
                     if("1" === daytxt[didx].text()) {
-                        stoff = parseInt(didx);
+                        stoff += parseInt(didx);
                         break;
                     }
                 }
                 
-                if (undefined === this.getDayText()[stoff + prm]) {
+                if (undefined === daytxt[stoff + prm]) {
                     throw new Error('invalid parameter');
                 }
-                return this.getDayText()[stoff + prm];
+                return daytxt[stoff + prm];
             } else {
                 throw new Error('invalid parameter');
             }
@@ -187,14 +221,23 @@ mf.comp.Calendar = class extends mf.Component {
             }
             /* setter */
             /* set month */
-            this.getChild(true)[0].execOption({
+            this.month().execOption({
                 text : (1 + prm.getMonth()) + ''
             });
             /* set day */
             this.m_date = prm;
             
             let fdt    = this.get1stDate();
-            let dayTxt = this.getDayText();
+            let dayTxt = [];
+            
+            let buf = this.table().child();
+            for (let bidx in buf) {
+                if (6 >= parseInt(bidx)) {
+                    continue;
+                }
+                dayTxt.push(buf[bidx]);
+            }
+            
             for (let upidx=0; upidx < 50 ;upidx++) {
                 if (upidx < fdt.getDay()) {
                     continue;
@@ -301,7 +344,7 @@ mf.comp.Calendar = class extends mf.Component {
         try {
             if (undefined === fnc) {
                 /* getter */
-                return (undefined === this.m_dayclkevt) ? null : this.m_dayclkevt;
+                return (undefined === this.m_dayclkevt) ? [undefined, undefined] : this.m_dayclkevt;
             }
             /* setter */
             if ('function' !== typeof fnc) {
