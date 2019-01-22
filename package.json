@@ -1,6 +1,6 @@
 {
   "name": "mofron-comp-calendar",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "calendar compoennt for mofron",
   "main": "index.js",
   "scripts": {

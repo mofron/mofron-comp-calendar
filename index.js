@@ -40,50 +40,42 @@ mf.comp.Calendar = class extends mf.Component {
     initDomConts () {
         try {
             super.initDomConts();
-            
-            this.child([
-                this.month(),
-                this.table()
-            ]);
-            
-            this.table().execOption({
-                child : this.weekString()  /* week */
-            });
+            this.child([this.month(), this.table()]);
+            this.table().execOption({ child : this.week() });  /* add week */
             
             /* day index text */
-            let mous_evt = (tgt, prm, flg) => {
-                try {
-                    tgt.adom().parent().style(
-                        prm.hoverStyle(flg)
-                    );
-                } catch (e) {
+            let hvr_fnc = (tgt, flg, prm) => {
+                try { prm.hoverStyle(tgt.adom().parent() ,flg); } catch (e) {
                     console.error(e.stack);
                     throw e;
                 }
-            }
-            let day_clk = (tgt, prm) => {
+            };
+            let day_clk = (tgt, clk, prm) => {
                 try {
+                    let idx = parseInt(tgt.text());
+                    if (('number' !== typeof idx) || (0 === idx)) {
+                        return;
+                    }
                     if (null !== prm.dayClickEvent()) {
-                        prm.dayClickEvent()[0](tgt, prm.dayClickEvent()[1]);
+                        prm.dayClickEvent()[0](tgt, idx, prm.dayClickEvent()[1]);
                     }
                 } catch (e) {
                     console.error(e.stack);
                     throw e;
                 }
-            }
+            };
+            
+            // add date element
             for (let idx=0; idx < 42; idx++) {
                 this.table().execOption({
                     child : [
                         new Text({
-                            text  : '',
-                            event : [
-                                new Hover(new mf.Param(mous_evt, this)),
-                                new Click(new mf.Param(day_clk,this))
-                            ]
+                            event : [new Hover([hvr_fnc, this]), new Click([day_clk,this])]
                         })
                     ]
-                })
+                });
             }
+            
             this.date(new Date());
             this.size('6rem', '4rem');
         } catch (e) {
@@ -94,24 +86,10 @@ mf.comp.Calendar = class extends mf.Component {
     
     month (prm) {
         try {
-            if (undefined === prm) {
-                /* getter */
-                if (undefined === this.m_month) {
-                    this.month(
-                        new Text({
-                            effect : [ new HrzPos('center') ],
-                            size   : '0.4rem',
-                            text   : ''
-                        })
-                    );
-                }
-                return this.m_month;
+            if (undefined !== prm) {
+                prm.execOption({ size: '0.4rem', effect: [ new HrzPos('center') ] });
             }
-            /* setter */
-            if (true !== mf.func.isInclude(prm, 'Text')) {
-                throw new Error('invalid parameter');
-            }
-            this.m_month = prm;
+            return this.innerComp('month', prm, Text);
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -120,30 +98,22 @@ mf.comp.Calendar = class extends mf.Component {
     
     table (prm) {
         try {
-            if (undefined === prm) {
-                /* getter */
-                if (undefined === this.m_table) {
-                    this.table(new Table({ colLength : 7 }));
-                }
-                return this.m_table;
+            if (undefined !== prm) {
+                prm.execOption({ colLength: 7 });
             }
-            /* setter */
-            if (true !== mf.func.isInclude(prm, 'Table')) {
-                throw new Error('invalid parameter');
-            }
-            this.m_table = prm;
+            return this.innerComp('table', prm, Table);
         } catch (e) {
             console.error(e.stack);
             throw e;
         }
     } 
     
-    weekString (prm) {
+    week (prm) {
         try {
             if (undefined === prm) {
                 /* getter */
                 if (undefined === this.m_weekstr) {
-                    this.weekString(['Sun','Mon','Tue','Wed','Thu','Fri','Sat']);
+                    this.week(['Sun','Mon','Tue','Wed','Thu','Fri','Sat']);
                 }
                 return this.m_weekstr;
             }
@@ -248,7 +218,7 @@ mf.comp.Calendar = class extends mf.Component {
                 if ( (fdt.getDate()     === new Date().getDate())    &&
                      (fdt.getMonth()    === new Date().getMonth())   &&
                      (fdt.getFullYear() === new Date().getFullYear()) ) {
-                    this.todayStyle(dayTxt[upidx]);
+                    this.todayStyle(dayTxt[upidx].adom().parent(), dayTxt[upidx]);
                 }
                 
                 dayTxt[upidx].text(fdt.getDate() + '');
@@ -277,63 +247,34 @@ mf.comp.Calendar = class extends mf.Component {
     }
     
     width (prm) {
-        try {
-            let ret = super.width(prm);
-            if (undefined === ret) {
-                this.getChild(true)[1].execOption({
-                    width : prm
-                });
-            }
-            return ret;
-        } catch (e) {
+        try { return this.table().width(prm); } catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
     
     height (prm) {
+        try { return this.table().height(prm); } catch (e) {
+            console.error(e.stack);
+            throw e;
+        }
+    }
+    
+    todayStyle (tgt, txt) {
         try {
-            let ret = super.height(prm);
-            if (undefined === ret) {
-                this.getChild(true)[1].execOption({
-                    height : prm
-                });
-            }
-            return ret;
+            txt.execOption({ mainColor : 'white' });
+            tgt.style({ 'background' : 'rgba(113, 136, 153, 1)' });
         } catch (e) {
             console.error(e.stack);
             throw e;
         }
     }
     
-    todayStyle (txt) {
+    hoverStyle (tgt, flg) {
         try {
-            if (undefined === txt) {
-                return;
-            }
-            txt.execOption({
-                mainColor : new mf.Color('white'),
+            tgt.style({
+                'border' : (true === flg) ? 'solid 1px rgba(113, 136, 153, 1)' : null
             });
-            txt.adom().parent().style({
-                'background' : 'rgba(113, 136, 153, 1)'
-            });
-        } catch (e) {
-            console.error(e.stack);
-            throw e;
-        }
-    }
-    
-    hoverStyle (flg) {
-        try {
-            if (true === flg) {
-                return {
-                    'border' : 'solid 1px rgba(113, 136, 153, 1)'
-                };
-            } else if (false === flg) {
-                return {
-                    'border' : null
-                };
-            }
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -344,7 +285,7 @@ mf.comp.Calendar = class extends mf.Component {
         try {
             if (undefined === fnc) {
                 /* getter */
-                return (undefined === this.m_dayclkevt) ? [undefined, undefined] : this.m_dayclkevt;
+                return (undefined === this.m_dayclkevt) ? null : this.m_dayclkevt;
             }
             /* setter */
             if ('function' !== typeof fnc) {
