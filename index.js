@@ -139,41 +139,17 @@ mf.comp.Calendar = class extends mf.Component {
         }
     }
     
-    getDayText (prm) {
+    dayText (prm) {
         try {
-            if (undefined === prm) {
-                let ret     = [];
-                let tbl_chd = this.table().child();
-                for (let tidx in tbl_chd) {
-                    if ("1" !== tbl_chd[tidx].text()) {
-                        continue;
-                    }
-                    for (let didx=tidx; didx < 48 ;didx++) {
-                        if ("" === tbl_chd[didx].text()) {
-                            return ret;
-                        }
-                        ret.push(tbl_chd[didx]);
-                    }
-                    break;
-                }
-                throw new Error('could not find day text');
-            } else if ('number' === typeof prm) {
-                let stoff  = 6;
-                let daytxt = this.table().child();
-                for (let didx in daytxt) {
-                    if("1" === daytxt[didx].text()) {
-                        stoff += parseInt(didx);
-                        break;
-                    }
-                }
-                
-                if (undefined === daytxt[stoff + prm]) {
-                    throw new Error('invalid parameter');
-                }
-                return daytxt[stoff + prm];
-            } else {
-                throw new Error('invalid parameter');
+            if (true !== mf.func.isInclude(prm, 'Text')) {
+                /* getter */
+                return ('number' === typeof prm) ? this.m_daytxt[prm] : this.m_daytxt;
             }
+            /* setter */
+            if (undefined === this.m_daytxt) {
+                this.m_daytxt = [];
+            }
+            this.m_daytxt.push(prm);
         } catch (e) {
             console.error(e.stack);
             throw e;
@@ -222,6 +198,7 @@ mf.comp.Calendar = class extends mf.Component {
                 }
                 
                 dayTxt[upidx].text(fdt.getDate() + '');
+                this.dayText(dayTxt[upidx]);
                 fdt.setDate(fdt.getDate() + 1);
             }
         } catch (e) {
